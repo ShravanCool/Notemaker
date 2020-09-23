@@ -107,4 +107,111 @@ class ClassNoteViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+class CreateTermView(CreateView,ListView):
+    """
+    Displays form for Term creation and lists all term objects related to
+    active-user.
+    """
+    template_name = 'term.html'
+    form_class = TermForm
+    context_object_name = 'terms'
+    success_url = reverse_lazy('Notes:term')
+
+    def form_valid(self, form):
+        """
+        Creates a new Term object goven the valid form
+        """
+        term_form = TermForm(self.request.POST)
+        term = term_form.save(commit = False)
+        term.user = self.request.user
+        term.term_slug = slugify(term.session)
+        term.save()
+        return HttpResponseRedirect(self.success_url)
+
+    def queryset(self):
+        """
+        Retrieves queryset of all Term objects related to the active user.
+        """
+        active_user = self.request.user
+        queryset = active_user.terms.all()
+        return queryset
+
+
+class UpdateOptionsTerm(FormView, ListView):
+    """
+    View for choosing current term, deleting a term, or access the term object
+    update page.
+    """
+    template_name = 'term_edit_delete.html'
+    context_object_name = 'terms'
+    form_class = CurrentTermForm
+    success_url = reverse_lazy('Notes:term')
+
+    def get_queryset(self):
+        """
+        Retrieves Term objects related to active user
+        """
+        user = self.request.user
+        queryset = user.terms.all()
+        return queryset
+
+    def get_context_data(self,**kwargs):
+        """
+        Provides extra context variables in addition to giving the form a more 
+        sensible context variable name
+        """
+        context = super().get_context_data(**kwargs)
+        context['editing'] = True
+        context['current_term_form'] = context.get('form')
+        return context
+
+    def get_terms(self):
+        """
+        Custom method that retrieves a queryset containing all of the 
+        active-user's Term objects and produces a list of two-item tuples
+        """
+        user = self.request.user
+        terms = user.terms.all()
+        choices = [('','Select current term')]
+        choices += [(i,j) for i,j in zip(terms,terms)]
+        return choices
+
+    def get_form_kwargs(self):
+        """
+        Passes the list of two-item tuples returned via the get-terms method to 
+        the form to be used as selectable choices.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['term_choices'] = self.get_terms()
+        return kwargs
+
+    def set_current_term(self,current_term):
+        """
+        Custom method that sets the current attribute of one Term object to
+        True, and the rest False. Term objects in question are associated with
+        the active-user.
+        """
+        user = self.request.user
+        all_terms = user.terms.all()
+        set_term = get_object_or_404(
+            Term,
+            user=user,
+            session=current_term,
+            )
+        for term in all_terms:
+            if term.current == True:
+                term.current = False
+            elif term == set_term:
+                term.current = True
+            term.save()
+
+    def form_valid(self, form):
+        """
+        Form for setting the active-user's current term.
+        """
+        current_term_form = CurrentTermForm(self.request.POST)
+        current_term = form.cleaned_data.get('current_term')
+        self.set_current_term(current_term)
+        return HttpResponseRedirect(self.success_url)
+
 
