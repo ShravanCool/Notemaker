@@ -214,4 +214,50 @@ class UpdateOptionsTerm(FormView, ListView):
         self.set_current_term(current_term)
         return HttpResponseRedirect(self.success_url)
 
+class UpdateTermView(UpdateView):
+    """
+    View that displays a form for updating an existing Term object.
+    """
+    template_name = 'update_term.html'
+    form_class = TermForm
+    success_url = reverse_lazy('Notes:term_edit')
+
+    def get_object(self):
+        """
+        Retrieves object to be updated.
+        """
+        term = get_object_or_404(
+            Term,
+            term_slug=self.kwargs['slug'],
+            user=self.request.user,
+            )
+        return term
+
+    def get_context_data(self,**kwargs):
+        """
+        Provides extra context to the template for the purpose of turning the 
+        'edit' button to a 'cancel edit' button
+        """
+        context = super().get_context_data(**kwargs)
+        context['cancel_edit'] = True
+        return context
+
+
+class DeleteTermView(DeleteView):
+    """
+    View for deleting an existing Term object
+    """
+    success_url = reverse_lazy()
+
+    def get_object(self):
+        """
+        Retrieves object to be deleted
+        """
+        term = get_object_or_404(
+            Term,
+            term_slug = self.kwargs['slug'],
+            user = self.request.user,
+            )
+        return term
+
 
