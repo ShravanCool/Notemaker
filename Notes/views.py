@@ -534,3 +534,19 @@ class CreateNoteView(CreateView):
         notes.save()
         return HttpResponseRedirect(self.success_url)
 
+
+class NoteList(ListView):
+    """
+    View for listing all ClassNote objects.
+    """
+    template_name = 'notes_list.html'
+    context_object_name = 'notes'
+
+    def get_queryset(self):
+        """
+        Retrieves all ClassNote objects associated with the active-user.
+        """
+        user = self.request.user
+        queryset = ClassNote.objects.filter(user=user)
+        return queryset
+
