@@ -417,5 +417,120 @@ class DeleteCourseView(DeleteView):
             return reverse('Notes:course_of_term_edit', args=url_arg)
 
 
+class CoursesOfTermEditView(ListView):
+    """
+    View for selecting to edit or delete a Course object of a specific term.
+    """
+    template_name = 'courses_of_term_edit_delete.html'
+    context_object_name = 'courses'
 
+    def get_context_data(self, **kwargs):
+        """
+        Provides wxtra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['single_term'] = True
+        slug = self.kwargs['slug']
+        context['slug'] = slug
+        subheader = slug[0].upper() + slug[1::]
+        sub_header = ' '.join(subheader.split('-'))
+        context['editing'] = True
+        context['term_name'] = ': ' + sub_header
+        return context
+
+    def query_set(self):
+        """
+        Retrieves all Course objects associated  with the active useras well as
+        a specific Term.
+        """
+        user = self.request.user
+        term = get_object_or_404(
+            Term,
+            term_slug=self.kwargs['slug'],
+            user=user,
+            )
+        slug = term.term_slug
+        return Course.objects.filter(user=user, term__term_slug=slug)
+
+
+class UpdateCourseView(UpdateView):
+    """
+    View for updating an existing Course object.
+    """
+    template_name = 'update_course.html'
+    form_class = CourseForm
+
+    def get_object(self):
+        """
+        Retrieves the object to be updated
+        """
+        course = get_object_or_404(
+            Course,
+            user=self.request.user,
+            course_slug=self.kwargs['slug'],
+            )
+        return course
+
+    def get_success_url(self):
+        """
+        Generates the url that the user gets redirewcted to upon successful
+        update. User is either redirected to the page containing all courses
+        or the courses of a specific term depending on where they accessed
+        the update page.
+        """
+        referer = self.request.META['HTTP_REFERER'].split('/')
+        if referer[-2] == 'SF':
+            return reverse_lazy('Notes:course_edit')
+        else:
+            url_arg = [self.get_object().term.term_slug]
+            return reverse('Notes:course_of_term_edit', args=url_arg)
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['cancel_edit'] = True
+        return context
+
+
+class CreateNoteView(CreateView):
+    """
+    View for creating a new ClassNote object.
+    """
+    template_name = 'notes.html'
+    form_class = ClassNoteForm
+    success_url = reverse_lazy('Notes:notes_list')
+
+    def get_form_kwargs(self):
+        """
+        Passes the active-user to the form for the purpose of dynamically
+        filtering the course-choices to only those associated with the 
+        active-user; additionally, should a new ClassNote object be created
+        via a specific course page, the course-choices is limited to just 
+        that specific course.
+        """
+        form_kwargs = super().get_form_kwargs()
+        form_kwargs.update({'active_user': self.request.user})
+
+        try:
+            if self.kwargs['course_id']:
+                course = Course.objects.filter(course_slug=self.kwargs['course_id'])
+                form_kwargs.update({'course': course})
+        except KeyError:
+            pass
+        return form_kwargs
+
+    def form_valid(self, form):
+        """
+        Instantiates a new ClassNote object goven a valid form.
+        """
+        notes_form = ClassNoteForm(self.request.POST)
+        notes = notes_form.save(commit=False)
+        user = self.request.user
+        notes.user = user
+        slug = slugify(notes.title)
+        notes.note_slug = slug
+        notes.save()
+        return HttpResponseRedirect(self.success_url)
 
