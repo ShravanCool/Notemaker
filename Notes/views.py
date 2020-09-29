@@ -261,3 +261,105 @@ class DeleteTermView(DeleteView):
         return term
 
 
+class CreateCourseView(CreateView, ListView):
+    """
+    View for creating a new Course object and listing all wxisting Course
+    objects.
+    """
+    template_name = 'course_list.html'
+    form_class = CourseForm
+    context_object_name = 'courses'
+    success_url = reverse_lazy('Notes:course')
+
+    def get_queryset(self):
+        """
+        Retrieves all course objects associated with the active user.
+        """
+        active_user = self.request.user
+        query_set = active_user.courses.all()
+        return query_set
+
+    def get_form_kwargs(self):
+        """
+        Passes the active-user to the form for the purpose of dynamically
+        filtering term-choices to those associated with the active-user.
+        """
+        kwargs = super().get_form_kwargs();
+        kwargs.update({'active_user': self.request.user})
+        return kwargs
+
+    def form_valid(self, form):
+        """
+        Instantiates a new course object given the valid form.
+        """
+        course_form = CourseForm(self.request.POST)
+        course = course_form.save(commit=False)
+        course.user = self.request.user
+        course.course_slug = slugify(course.course_code)
+        course.save()
+        return HttpResponseRedirect(self.success_url)
+
+
+class CoursesOFTermView(CreateView, ListView):
+    """
+    View for creating a course object through a specific term as well as listing
+    all Course objects associated with a specific Term object. 
+    """
+    template_name = 'course_list.html'
+    context_object_name = 'courses'
+    form_class = CoursesOfTermForm
+
+    def get_success_url(self):
+        """
+        URl that directs a user to the courses of a specific term page.
+        """
+        args = [self.kwargs['slug']]
+        return reverse_lazy('Notes:course_term', args=args)
+
+    def get_queryset(self):
+        """
+        Retrieves Course objects associated with a specific term and 
+        the active-user.
+        """
+        user = self.request.user
+        term = get_object_or_404(
+            Term,
+            term_slug=self.kwargs['slug'],
+            user=self.request.user,
+            )
+        slug = term.term_slug
+        return Course.objects.filter(user=user, term__term_slug=slug)
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template
+        """
+        context = super().get_context_data(**kwargs)
+        context['single_term'] = True
+        slug = self.kwargs['slug']
+        context['slug'] = slug
+        subheader = slug[0].upper() + slug[1::]
+        sub_header = ' '.join(subheader.split('-'))
+        context['term_name'] = ': ' + sub_header
+        return context
+
+    def form_valid(self, form):
+        """
+        Instantiates a new Course object given the valid form.
+        """
+        course_form = CoursesOfTermForm(self.request.POST)
+        course = course_form.save(commit=False)
+        term = get_object_or_404(
+            Term,
+            term_slug=self.kwargs['slug'],
+            user=self.request.user,
+            )
+        course.term = term
+        course.user = self.request.user
+        course.course_slug = slugify(course.course_code)
+        course.save()
+        return HttpResponseRedirect(self.get_success_url)
+
+
+#  class UpdateOptionsCourse(ListView):
+
