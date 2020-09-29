@@ -361,5 +361,61 @@ class CoursesOFTermView(CreateView, ListView):
         return HttpResponseRedirect(self.get_success_url)
 
 
-#  class UpdateOptionsCourse(ListView):
+class UpdateOptionsCourse(ListView):
+    """
+    View for selecting to edit or delete a specific Course object
+    """
+    template_name = 'course_edit_delete.html'
+    context_object_name = 'courses'
+
+    def get_queryset(self):
+        """
+        Retrieves all Course objects associated with the active-user.
+        """
+        user = self.request.user
+        queryset = user.courses.all()
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['editing'] = True
+        return context
+
+
+class DeleteCourseView(DeleteView):
+    """
+    View for deleting an existing course object.
+    """
+    success_url = reverse_lazy('Notes:course_edit')
+
+    def get_object(self):
+        """
+        Retrieves to object to be deleted.
+        """
+        course = get_object_or_404(
+            Course,
+            user = self.request.user,
+            course_slug = self.kwargs['slug'],
+            )
+        return course
+
+    def get_success_url(self):
+        """
+        Generates the URL that the active-user is redirected to. If a course
+        object is deleted within a specific term, the URL generated will direct 
+        them to the course page of that aforementioned term; otherwise the URL
+        that lists all courses will be generated
+        """
+        referer = self.request.META['HTTP_REFERER'].split('/')
+        if referer[-2] == 'Edit':
+            return reverse_lazy('Notes:course_edit')
+        else:
+            url_arg = [self.get_object().term.term_slug]
+            return reverse('Notes:course_of_term_edit', args=url_arg)
+
+
+
 
