@@ -739,4 +739,76 @@ class DeleteNoteView(DeleteView):
         return object
 
 
+class UpdateNoteView(UpdateView):
+    """
+    View for updating an existing ClassNote object.
+    """
+    template_name = 'note_update.html'
+    form_class = UpdateNoteForm
+    context_object_name = 'note'
+
+    def get_object(self):
+        """
+        Retrieves the object to be updated.
+        """
+        note_slug = self.kwargs['note_slug']
+        note = get_object_or_404(
+            ClassNote,
+            user = self.request.user,
+            note_slug=note_slug,
+        )
+        return note
+
+    def get_success_url(self):
+        """
+        Generates the URL leading tthe user back to the ClassNote object's
+        DetailView.
+        """
+        note = self.get_object()
+        term_slug = note.course.term.term_slug
+        course_slug = note.course.course_slug
+        note_slug = note.note_slug
+        args = [term_slug, course_slug, note_slug]
+        return reverse_lazy('Notes:one_note', args=args)
+
+    def get_context_data(self, **kwargs):
+        """
+        Provide extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['cancel_edit'] = True
+        return context
+
+
+class NotesListSearchQuery(ListView):
+    """
+    If multiple ClassNote object matches are made from the data the user
+    provides to the searchbar, this view will generate a queryset of all those
+    objects with similar titles.
+    """
+    template_name = 'notes_list.html'
+    context_object_name = 'notes'
+
+    def queryset(self):
+        """
+        Generates a queryset of all ClassNote objects that have a title whose 
+        substring matches what the user provides to the searchbar.
+        """
+        slugs = self.kwargs['notes_query'].split('+')
+        user = self.request.user
+
+        queryset = None
+        for slug in slugs:
+            if queryset is None:
+                queryset = ClassNote.objects.filter(user=user, note_slug=slug)
+            else:
+                queryset = queryset | ClassNote.objects.filter(
+                    user=user,
+                    note_slug=slug,
+                    )
+
+            if len(queryset) == 0:
+                return HttpResponseRedirect(reverse_lazy('Notes:notes_list'))
+
+            return queryset
 
