@@ -617,33 +617,126 @@ class NotesListDashboard(ListView):
         """
         context = super().get_context_data()
         context['dashboard'] = True
-        return Context
+        return context
 
 
-    class ReadNote(DetailView):
+class ReadNote(DetailView):
+    """
+    View reading an existing ClassNote object.
+    """
+    template_name = 'notes_list.html'
+    context_object_name = 'note'
+
+    def get_object(self):
         """
-        View reading an existing ClassNote object.
+        Retrieves the ClassNote object to be read.
         """
-        template_name = 'notes_list.html'
-        context_object_name = 'note'
+        note = get_object_or_404(
+            ClassNote,
+            user=self.request.user,
+            note_slug=self.kwargs['note_slug'],
+        )
+        return note
 
-        def get_object(self):
-            """
-            Retrieves the ClassNote object to be read.
-            """
-            note = get_object_or_404(
-                ClassNote,
-                user=self.request.user,
-                note_slug=self.kwargs['note_slug'],
-                )
-            return note
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['single_note'] = True
+        return context
 
-        def get_context_data(self, **kwargs):
-            """
-            Provides extra context to the template.
-            """
-            context = super().get_context_data(**kwargs)
-            context['single_note'] = True
-            return context
+
+class NoteUpdateOptions(ListView):
+    """
+    View for selecting whether to update or delete an existing ClassNote
+    object.
+    """
+    template_name = 'notes_edit_delete.html'
+    context_object_name = 'notes'
+
+    def get_queryset(self):
+        """
+        Retrieves all ClassNote objects related to the active-user
+        """
+        user = self.request.user
+        queryset = ClassNote.objects.filter(user=user)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        context['editing'] = True
+        context['single_course'] = False
+        return context
+
+
+class NotesOfCourseUpdateOptions(ListView):
+    """
+    View for listing all ClassNote objects of a specific course.
+    """
+    template_name = 'notes_edit_delete.html'
+    context_object_name = 'notes'
+
+    def get_course(self):
+        """
+        Custom method that retrieves a specific course.
+        """
+        slug = self.request.META['HTTP_REFERER'].split('/')[-2]
+        user = self.request.user
+        course = get_object_or_404(
+            Course,
+            user=user,
+            course_slug=slug,
+        )
+        return course
+
+    def get_queryset(self):
+        """
+        Retrieves all ClassNote objects associated with the active-user and
+        specific course.
+        """
+        user = self.request.user
+        course = self.get_course()
+        queryset = user.notes.filter(course=course)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data(**kwargs)
+        course = self.get_course()
+        term_slug = course.term.term_slug
+        course_slug = course.course_slug
+        context['term_slug'] = term_slug
+        context['course_id'] = course_slug
+        context['sub_header'] = course.title
+        context['editing'] = True
+        context['single_course'] = True
+        return context
+
+
+class DeleteNoteView(DeleteView):
+    """
+    View for deleting an existing ClassNote object.
+    """
+    success_url = reverse_lazy('Notes:note_edit')
+
+    def get_object(self):
+        """
+        Retrieves the ClassNote object to be deleted.
+        """
+        user = self.request.user
+        create_date = self.kwargs['created_at']
+        object = get_object_or_404(
+            ClassNote,
+            user=user,
+            created_at=create_date,
+        )
+        return object
+
 
 
