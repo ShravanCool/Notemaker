@@ -12,6 +12,9 @@ venv/
 #SQLite database files
 *.sqlite3
 
+#accounts app
+accounts/
+
 # C extensions
 *.so
 
