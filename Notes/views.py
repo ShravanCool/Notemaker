@@ -550,3 +550,100 @@ class NoteList(ListView):
         queryset = ClassNote.objects.filter(user=user)
         return queryset
 
+
+class NotesOfCourse(ListView):
+    """
+    View for listing all ClassNote objects of a specified coure.
+    """
+    template_name = 'notes_list.html'
+    context_object_name = 'notes'
+
+    def get_course(self):
+        """
+        Custom method that retrieves a specific Course object.
+        """
+        user = self.request.user
+        course = get_object_or_404(
+            Course,
+            user=user,
+            course_slug=self.kwargs['course_id'],
+        )
+        return course
+
+    def get_context_data(self, **kwargs):
+        """
+        Provides the template with extra content.
+        """
+        context = super().get_context_data(**kwargs)
+        course = self.get_course()
+        term_slug = course.term.term_slug
+        context['term_slug'] = term_slug
+        context['course_id'] = course_slug
+        context['single_course'] = True
+        context['sub_header'] = course.title
+        return context
+
+    def query_set(self):
+        """
+        Retrieves all ClassNote objects associated with a specific course
+        and active-user.
+        """
+        user = self.request.user
+        course = self.get_course()
+        queryset = ClassNote.objects.filter(user=user, course=course)
+        return queryset
+
+
+class NotesListDashboard(ListView):
+    """
+    View for listing all ClassNote objects on the dashboard.
+    """
+    template_name = 'dashboard.html'
+    context_object_name = 'notes'
+
+    def get_queryset(self):
+        """
+        Retrieves all ClassNote objects related to the active-user and orders it
+        by most recent.
+        """
+        user = self.request.user
+        queryset = ClassNote.objects.filter(user=user)
+        queryset = queryset.order_by('-created_at')
+        return queryset
+
+    def get_context_data(self):
+        """
+        Provides extra context to the template.
+        """
+        context = super().get_context_data()
+        context['dashboard'] = True
+        return Context
+
+
+    class ReadNote(DetailView):
+        """
+        View reading an existing ClassNote object.
+        """
+        template_name = 'notes_list.html'
+        context_object_name = 'note'
+
+        def get_object(self):
+            """
+            Retrieves the ClassNote object to be read.
+            """
+            note = get_object_or_404(
+                ClassNote,
+                user=self.request.user,
+                note_slug=self.kwargs['note_slug'],
+                )
+            return note
+
+        def get_context_data(self, **kwargs):
+            """
+            Provides extra context to the template.
+            """
+            context = super().get_context_data(**kwargs)
+            context['single_note'] = True
+            return context
+
+
