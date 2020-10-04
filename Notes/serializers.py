@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import Term, Course, ClassNote
 
-class TermSerializer(serializers.HyperLinkedModelSerializer):
+class TermSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes and deserializes Term instances into representations
     such as JSON.

@@ -7,7 +7,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse_lazy
-from django.views.generics.base import TemplateView
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import CreateView
 from rest_framework import viewsets
 from .serializers import UserSerializer

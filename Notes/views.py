@@ -4,11 +4,11 @@ from django.urls import reverse_lazy, reverse
 from django.utils.text import slugify
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.wdit import (CreateView, UpdateView, DeleteView,
+from django.views.generic.edit import (CreateView, UpdateView, DeleteView,
                                        FormView,)
 from django.views.generic.list import ListView
 from rest_framework import permissions, viewsets
-from .forms import (TermForm, CourseForm, ClassNoteForm, CourseOfTermForm,
+from .forms import (TermForm, CourseForm, ClassNoteForm, CoursesOfTermForm,
                     UpdateNoteForm, SearchBarForm, CurrentTermForm)
 from .models import Term, Course, ClassNote
 from .serializers import TermSerializer, CourseSerializer, ClassNoteSerializer
@@ -300,7 +300,7 @@ class CreateCourseView(CreateView, ListView):
         return HttpResponseRedirect(self.success_url)
 
 
-class CoursesOFTermView(CreateView, ListView):
+class CoursesOfTermView(CreateView, ListView):
     """
     View for creating a course object through a specific term as well as listing
     all Course objects associated with a specific Term object. 
@@ -535,7 +535,7 @@ class CreateNoteView(CreateView):
         return HttpResponseRedirect(self.success_url)
 
 
-class NoteList(ListView):
+class NotesList(ListView):
     """
     View for listing all ClassNote objects.
     """

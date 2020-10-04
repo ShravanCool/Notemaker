@@ -52,7 +52,7 @@ class Course(models.Model):
         unique=True,
         blank=False,
         )
-    title = models.Charfield(max_length=40, blank=False)
+    title = models.CharField(max_length=40, blank=False)
     course_slug = models.SlugField(null=True)
 
     def __str__(self):

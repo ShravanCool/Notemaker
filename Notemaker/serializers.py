@@ -4,7 +4,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-class UserSerializer(serializers.HyperLinkedNodelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes and Deserializes User instances into representations such as 
     JSON.
