@@ -1,5 +1,5 @@
-from django.shortcuts import render, resolve_url, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, resolve_url, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils.text import slugify
 from django.views.generic.base import TemplateView
@@ -9,7 +9,7 @@ from django.views.generic.edit import (CreateView, UpdateView, DeleteView,
 from django.views.generic.list import ListView
 from rest_framework import permissions, viewsets
 from .forms import (TermForm, CourseForm, ClassNoteForm, CoursesOfTermForm,
-                    UpdateNoteForm, SearchBarForm, CurrentTermForm)
+                    UpdateNoteForm, SearchBarForm, CurrentTermForm,)
 from .models import Term, Course, ClassNote
 from .serializers import TermSerializer, CourseSerializer, ClassNoteSerializer
 
@@ -29,23 +29,22 @@ def SearchBar(request):
         notes = user.notes.all()
 
         if notes:
-            title = ''.join(request.GET['title'].lower.split(' '))
+            title = ''.join(request.GET['title'].lower().split(' '))
 
             matches = []
             for note in notes:
                 if title in note.join_title():
                     course = note.course
-                    term = note.term
+                    term = course.term
                     args = [term.term_slug, course.course_slug, note.note_slug]
                     redirect_url = reverse_lazy("Notes:one_note", args=args)
                     matches.append(note.note_slug)
 
             if len(matches) > 1:
                 args = ['+'.join(matches)]
-                redirect_url = reverse_lazy('Notes:notes_search',args=args)
+                redirect_url = reverse_lazy('Notes:notes_search', args=args)
 
     return HttpResponseRedirect(redirect_url)
-
 
 class TermViewSet(viewsets.ModelViewSet):
     """
@@ -56,8 +55,8 @@ class TermViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Retrieves all term objects associated with the active_user; otherwise
-        returns an empty queryset for other users.
+        Retrieves all Term objects associated with the active_user; otherwise
+        returns an empty queryset for anonymous users.
         """
         active_user = self.request.user
         if active_user.is_authenticated:
@@ -66,10 +65,9 @@ class TermViewSet(viewsets.ModelViewSet):
             queryset = Term.objects.none()
         return queryset
 
-
 class CourseViewSet(viewsets.ModelViewSet):
     """
-    Displays the JSON data of all Course objects associated with the active-user.
+    Displays JSON data of all Course objects associated with the active-user.
     """
     serializer_class = CourseSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
@@ -77,7 +75,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """
         Retrieves all Course objects associated with the active_user; otherwise
-        returns an empty queryset for other users.
+        returns an empty queryset for anonymous users.
         """
         active_user = self.request.user
         if active_user.is_authenticated:
@@ -86,18 +84,17 @@ class CourseViewSet(viewsets.ModelViewSet):
             queryset = Course.objects.none()
         return queryset
 
-
 class ClassNoteViewSet(viewsets.ModelViewSet):
     """
-    Displays the JSON data of all ClassNote objects associated with the active-user.
+    Displays JSON data of all ClassNote objects associated with the active-user.
     """
     serializer_class = ClassNoteSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         """
-        Retrieves all ClassNote objects associated with the active_user; otherwise
-        returns an empty queryset for other users.
+        Retrieves all ClassNote objects associated with the active_user;
+        otherwise returns an empty queryset for anonymous users.
         """
         active_user = self.request.user
         if active_user.is_authenticated:
@@ -106,10 +103,9 @@ class ClassNoteViewSet(viewsets.ModelViewSet):
             queryset = ClassNote.objects.none()
         return queryset
 
-
-class CreateTermView(CreateView,ListView):
+class CreateTermView(CreateView, ListView):
     """
-    Displays form for Term creation and lists all term objects related to
+    Displays form for Term creation and lists all Terms objects related to
     active-user.
     """
     template_name = 'term.html'
@@ -119,7 +115,7 @@ class CreateTermView(CreateView,ListView):
 
     def form_valid(self, form):
         """
-        Creates a new Term object goven the valid form
+        Creates a new Term object given the valid form.
         """
         term_form = TermForm(self.request.POST)
         term = term_form.save(commit = False)
@@ -128,18 +124,17 @@ class CreateTermView(CreateView,ListView):
         term.save()
         return HttpResponseRedirect(self.success_url)
 
-    def queryset(self):
+    def get_queryset(self):
         """
-        Retrieves queryset of all Term objects related to the active user.
+        Retrieves  queryset of all Term objects related to the active-user.
         """
         active_user = self.request.user
         queryset = active_user.terms.all()
         return queryset
 
-
 class UpdateOptionsTerm(FormView, ListView):
     """
-    View for choosing current term, deleting a term, or access the term object
+    View for choosing current term, deleting a term, or access the Term object
     update page.
     """
     template_name = 'term_edit_delete.html'
@@ -149,16 +144,16 @@ class UpdateOptionsTerm(FormView, ListView):
 
     def get_queryset(self):
         """
-        Retrieves Term objects related to active user
+        Retrieves Term objects related to active user.
         """
         user = self.request.user
         queryset = user.terms.all()
         return queryset
 
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
         """
-        Provides extra context variables in addition to giving the form a more 
-        sensible context variable name
+        Provides extra context variables in addition to giving the form a more
+        sensible context variable name.
         """
         context = super().get_context_data(**kwargs)
         context['editing'] = True
@@ -167,25 +162,25 @@ class UpdateOptionsTerm(FormView, ListView):
 
     def get_terms(self):
         """
-        Custom method that retrieves a queryset containing all of the 
-        active-user's Term objects and produces a list of two-item tuples
+        Custom method that retrieves a queryset containing all of the
+        active-user's Term objects and produces a list of two-item tuples.
         """
         user = self.request.user
         terms = user.terms.all()
-        choices = [('','Select current term')]
-        choices += [(i,j) for i,j in zip(terms,terms)]
+        choices = [('', 'Select current term')]
+        choices += [(i, j) for i, j in zip(terms, terms)]
         return choices
 
     def get_form_kwargs(self):
         """
-        Passes the list of two-item tuples returned via the get-terms method to 
+        Passes the list of two-item tuples returned via the get_terms method to
         the form to be used as selectable choices.
         """
         kwargs = super().get_form_kwargs()
         kwargs['term_choices'] = self.get_terms()
         return kwargs
 
-    def set_current_term(self,current_term):
+    def set_current_term(self, current_term):
         """
         Custom method that sets the current attribute of one Term object to
         True, and the rest False. Term objects in question are associated with
@@ -227,31 +222,30 @@ class UpdateTermView(UpdateView):
         Retrieves object to be updated.
         """
         term = get_object_or_404(
-            Term,
-            term_slug=self.kwargs['slug'],
-            user=self.request.user,
-            )
+        Term,
+        term_slug=self.kwargs['slug'],
+        user=self.request.user,
+        )
         return term
 
-    def get_context_data(self,**kwargs):
+    def get_context_data(self, **kwargs):
         """
-        Provides extra context to the template for the purpose of turning the 
-        'edit' button to a 'cancel edit' button
+        Provides extra context to the template for the purpose of turning the
+        'edit' button into a 'cancel edit' button.
         """
         context = super().get_context_data(**kwargs)
         context['cancel_edit'] = True
         return context
 
-
 class DeleteTermView(DeleteView):
     """
-    View for deleting an existing Term object
+    View for deleting an existing Term object.
     """
-    success_url = reverse_lazy()
+    success_url = reverse_lazy('Notes:term_edit')
 
     def get_object(self):
         """
-        Retrieves object to be deleted
+        Retrieves object to be deleted.
         """
         term = get_object_or_404(
             Term,
@@ -260,10 +254,9 @@ class DeleteTermView(DeleteView):
             )
         return term
 
-
 class CreateCourseView(CreateView, ListView):
     """
-    View for creating a new Course object and listing all wxisting Course
+    View for creating a new Course object and listing all existing Course
     objects.
     """
     template_name = 'course_list.html'
@@ -273,37 +266,36 @@ class CreateCourseView(CreateView, ListView):
 
     def get_queryset(self):
         """
-        Retrieves all course objects associated with the active user.
+        Retrieves all Course objects associated with the active-user.
         """
         active_user = self.request.user
-        query_set = active_user.courses.all()
-        return query_set
+        queryset = active_user.courses.all()
+        return queryset
 
     def get_form_kwargs(self):
         """
         Passes the active-user to the form for the purpose of dynamically
         filtering term-choices to those associated with the active-user.
         """
-        kwargs = super().get_form_kwargs();
+        kwargs = super().get_form_kwargs()
         kwargs.update({'active_user': self.request.user})
         return kwargs
 
     def form_valid(self, form):
         """
-        Instantiates a new course object given the valid form.
+        Instantiates a new Course object given the valid form.
         """
         course_form = CourseForm(self.request.POST)
-        course = course_form.save(commit=False)
+        course = course_form.save(commit = False)
         course.user = self.request.user
         course.course_slug = slugify(course.course_code)
         course.save()
         return HttpResponseRedirect(self.success_url)
 
-
 class CoursesOfTermView(CreateView, ListView):
     """
-    View for creating a course object through a specific term as well as listing
-    all Course objects associated with a specific Term object. 
+    View for creating a Course object through a specific term as well as listing
+    all Course objects associated with a specific Term object.
     """
     template_name = 'course_list.html'
     context_object_name = 'courses'
@@ -311,28 +303,28 @@ class CoursesOfTermView(CreateView, ListView):
 
     def get_success_url(self):
         """
-        URl that directs a user to the courses of a specific term page.
+        URL that directs user to the courses of a specific term page.
         """
         args = [self.kwargs['slug']]
-        return reverse_lazy('Notes:course_term', args=args)
+        return reverse_lazy('Notes:course_term', args = args)
 
     def get_queryset(self):
         """
-        Retrieves Course objects associated with a specific term and 
-        the active-user.
+        Retrieves Course objects associated with a specific term and the
+        active-user.
         """
         user = self.request.user
         term = get_object_or_404(
             Term,
-            term_slug=self.kwargs['slug'],
-            user=self.request.user,
+            term_slug = self.kwargs['slug'],
+            user = self.request.user,
             )
         slug = term.term_slug
-        return Course.objects.filter(user=user, term__term_slug=slug)
+        return Course.objects.filter(user=user,term__term_slug=slug)
 
     def get_context_data(self, **kwargs):
         """
-        Provides extra context to the template
+        Provides extra context to the template.
         """
         context = super().get_context_data(**kwargs)
         context['single_term'] = True
@@ -358,12 +350,11 @@ class CoursesOfTermView(CreateView, ListView):
         course.user = self.request.user
         course.course_slug = slugify(course.course_code)
         course.save()
-        return HttpResponseRedirect(self.get_success_url)
-
+        return HttpResponseRedirect(self.get_success_url())
 
 class UpdateOptionsCourse(ListView):
     """
-    View for selecting to edit or delete a specific Course object
+    View for selecting to edit or delete a specific Course object.
     """
     template_name = 'course_edit_delete.html'
     context_object_name = 'courses'
@@ -384,16 +375,15 @@ class UpdateOptionsCourse(ListView):
         context['editing'] = True
         return context
 
-
 class DeleteCourseView(DeleteView):
     """
-    View for deleting an existing course object.
+    View for deleting an existing Course object.
     """
     success_url = reverse_lazy('Notes:course_edit')
 
     def get_object(self):
         """
-        Retrieves to object to be deleted.
+        Retrieves the object to be deleted.
         """
         course = get_object_or_404(
             Course,
@@ -404,29 +394,28 @@ class DeleteCourseView(DeleteView):
 
     def get_success_url(self):
         """
-        Generates the URL that the active-user is redirected to. If a course
-        object is deleted within a specific term, the URL generated will direct 
+        Generates the URL that the active-user is redirected to. If a Course
+        object is deleted within a specific term, the URL generated will direct
         them to the course page of that aforementioned term; otherwise the URL
-        that lists all courses will be generated
+        that lists all courses wil be generated.
         """
         referer = self.request.META['HTTP_REFERER'].split('/')
         if referer[-2] == 'Edit':
             return reverse_lazy('Notes:course_edit')
         else:
             url_arg = [self.get_object().term.term_slug]
-            return reverse('Notes:course_of_term_edit', args=url_arg)
-
+            return reverse('Notes:course_of_term_edit', args = url_arg)
 
 class CoursesOfTermEditView(ListView):
     """
-    View for selecting to edit or delete a Course object of a specific term.
+    View for selecting to edit or delete a Course obejct of a specific term.
     """
     template_name = 'courses_of_term_edit_delete.html'
     context_object_name = 'courses'
 
     def get_context_data(self, **kwargs):
         """
-        Provides wxtra context to the template.
+        Provides extra context to the template.
         """
         context = super().get_context_data(**kwargs)
         context['single_term'] = True
@@ -438,9 +427,9 @@ class CoursesOfTermEditView(ListView):
         context['term_name'] = ': ' + sub_header
         return context
 
-    def query_set(self):
+    def get_queryset(self):
         """
-        Retrieves all Course objects associated  with the active useras well as
+        Retrieves all Course ojects associated with the active-user as well as
         a specific Term.
         """
         user = self.request.user
@@ -450,8 +439,7 @@ class CoursesOfTermEditView(ListView):
             user=user,
             )
         slug = term.term_slug
-        return Course.objects.filter(user=user, term__term_slug=slug)
-
+        return Course.objects.filter(user=user,term__term_slug=slug)
 
 class UpdateCourseView(UpdateView):
     """
@@ -462,18 +450,18 @@ class UpdateCourseView(UpdateView):
 
     def get_object(self):
         """
-        Retrieves the object to be updated
+        Retrieves the object to be updated.
         """
         course = get_object_or_404(
             Course,
-            user=self.request.user,
-            course_slug=self.kwargs['slug'],
+            user = self.request.user,
+            course_slug = self.kwargs['slug'],
             )
         return course
 
     def get_success_url(self):
         """
-        Generates the url that the user gets redirewcted to upon successful
+        Generates the URL that the user gets redirected to upon successful
         update. User is either redirected to the page containing all courses
         or the courses of a specific term depending on where they accessed
         the update page.
@@ -487,12 +475,11 @@ class UpdateCourseView(UpdateView):
 
     def get_context_data(self, **kwargs):
         """
-        Provides extra context to the template.
+        Provides extra context the template.
         """
         context = super().get_context_data(**kwargs)
         context['cancel_edit'] = True
         return context
-
 
 class CreateNoteView(CreateView):
     """
@@ -505,9 +492,9 @@ class CreateNoteView(CreateView):
     def get_form_kwargs(self):
         """
         Passes the active-user to the form for the purpose of dynamically
-        filtering the course-choices to only those associated with the 
+        filtering the course-choices to only those associated with the
         active-user; additionally, should a new ClassNote object be created
-        via a specific course page, the course-choices is limited to just 
+        via a specific course page, the course-choices is limited to just
         that specific course.
         """
         form_kwargs = super().get_form_kwargs()
@@ -523,7 +510,7 @@ class CreateNoteView(CreateView):
 
     def form_valid(self, form):
         """
-        Instantiates a new ClassNote object goven a valid form.
+        Instantiates a new ClassNote object given a valid form.
         """
         notes_form = ClassNoteForm(self.request.POST)
         notes = notes_form.save(commit=False)
@@ -550,10 +537,9 @@ class NotesList(ListView):
         queryset = ClassNote.objects.filter(user=user)
         return queryset
 
-
 class NotesOfCourse(ListView):
     """
-    View for listing all ClassNote objects of a specified coure.
+    View for listing all ClassNote objects of a specific course.
     """
     template_name = 'notes_list.html'
     context_object_name = 'notes'
@@ -572,27 +558,27 @@ class NotesOfCourse(ListView):
 
     def get_context_data(self, **kwargs):
         """
-        Provides the template with extra content.
+        Provides the template with extra context.
         """
         context = super().get_context_data(**kwargs)
         course = self.get_course()
         term_slug = course.term.term_slug
+        course_slug = course.course_slug
         context['term_slug'] = term_slug
         context['course_id'] = course_slug
         context['single_course'] = True
         context['sub_header'] = course.title
         return context
 
-    def query_set(self):
+    def get_queryset(self):
         """
-        Retrieves all ClassNote objects associated with a specific course
-        and active-user.
+        Retrieves all ClassNote objects associated with a specific course and
+        the active-user.
         """
         user = self.request.user
         course = self.get_course()
         queryset = ClassNote.objects.filter(user=user, course=course)
         return queryset
-
 
 class NotesListDashboard(ListView):
     """
@@ -619,7 +605,6 @@ class NotesListDashboard(ListView):
         context['dashboard'] = True
         return context
 
-
 class ReadNote(DetailView):
     """
     View reading an existing ClassNote object.
@@ -635,7 +620,7 @@ class ReadNote(DetailView):
             ClassNote,
             user=self.request.user,
             note_slug=self.kwargs['note_slug'],
-        )
+            )
         return note
 
     def get_context_data(self, **kwargs):
@@ -646,10 +631,9 @@ class ReadNote(DetailView):
         context['single_note'] = True
         return context
 
-
 class NoteUpdateOptions(ListView):
     """
-    View for selecting whether to update or delete an existing ClassNote
+    View for selecting whether to update or delete and existing ClassNote
     object.
     """
     template_name = 'notes_edit_delete.html'
@@ -657,7 +641,7 @@ class NoteUpdateOptions(ListView):
 
     def get_queryset(self):
         """
-        Retrieves all ClassNote objects related to the active-user
+        Retrieves all ClassNote objects related to the active-user.
         """
         user = self.request.user
         queryset = ClassNote.objects.filter(user=user)
@@ -671,7 +655,6 @@ class NoteUpdateOptions(ListView):
         context['editing'] = True
         context['single_course'] = False
         return context
-
 
 class NotesOfCourseUpdateOptions(ListView):
     """
@@ -690,7 +673,7 @@ class NotesOfCourseUpdateOptions(ListView):
             Course,
             user=user,
             course_slug=slug,
-        )
+            )
         return course
 
     def get_queryset(self):
@@ -718,7 +701,6 @@ class NotesOfCourseUpdateOptions(ListView):
         context['single_course'] = True
         return context
 
-
 class DeleteNoteView(DeleteView):
     """
     View for deleting an existing ClassNote object.
@@ -727,23 +709,22 @@ class DeleteNoteView(DeleteView):
 
     def get_object(self):
         """
-        Retrieves the ClassNote object to be deleted.
+        Retrieves the ClassNote object to be deleted
         """
         user = self.request.user
         create_date = self.kwargs['created_at']
         object = get_object_or_404(
             ClassNote,
-            user=user,
-            created_at=create_date,
-        )
+            user = user,
+            created_at = create_date,
+            )
         return object
-
 
 class UpdateNoteView(UpdateView):
     """
     View for updating an existing ClassNote object.
     """
-    template_name = 'note_update.html'
+    template_name = "note_update.html"
     form_class = UpdateNoteForm
     context_object_name = 'note'
 
@@ -755,13 +736,13 @@ class UpdateNoteView(UpdateView):
         note = get_object_or_404(
             ClassNote,
             user = self.request.user,
-            note_slug=note_slug,
-        )
+            note_slug = note_slug,
+            )
         return note
 
     def get_success_url(self):
         """
-        Generates the URL leading tthe user back to the ClassNote object's
+        Generates the URL leading the user back to the ClassNote object's
         DetailView.
         """
         note = self.get_object()
@@ -769,16 +750,15 @@ class UpdateNoteView(UpdateView):
         course_slug = note.course.course_slug
         note_slug = note.note_slug
         args = [term_slug, course_slug, note_slug]
-        return reverse_lazy('Notes:one_note', args=args)
+        return reverse_lazy('Notes:one_note', args = args)
 
     def get_context_data(self, **kwargs):
         """
-        Provide extra context to the template.
+        Provides extra context to the template.
         """
         context = super().get_context_data(**kwargs)
         context['cancel_edit'] = True
         return context
-
 
 class NotesListSearchQuery(ListView):
     """
@@ -786,12 +766,12 @@ class NotesListSearchQuery(ListView):
     provides to the searchbar, this view will generate a queryset of all those
     objects with similar titles.
     """
-    template_name = 'notes_list.html'
-    context_object_name = 'notes'
+    template_name = "notes_list.html"
+    context_object_name = "notes"
 
-    def queryset(self):
+    def get_queryset(self):
         """
-        Generates a queryset of all ClassNote objects that have a title whose 
+        Generates a queryset of all ClassNote objects that have a title whose
         substring matches what the user provides to the searchbar.
         """
         slugs = self.kwargs['notes_query'].split('+')
@@ -807,8 +787,7 @@ class NotesListSearchQuery(ListView):
                     note_slug=slug,
                     )
 
-            if len(queryset) == 0:
-                return HttpResponseRedirect(reverse_lazy('Notes:notes_list'))
+        if len(queryset) == 0:
+            return HttpResponseRedirect(reverse_lazy('Notes:notes_list'))
 
-            return queryset
-
+        return queryset
