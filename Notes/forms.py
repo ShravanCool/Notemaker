@@ -168,6 +168,8 @@ class CurrentTermForm(forms.Form):
     """
     Form that allows user to select a current term.
     """
+    current_term = forms.CharField()
+
     def __init__(self,term_choices,*args,**kwargs):
         """
         HTML widget modification and initializes form with term choices it 
