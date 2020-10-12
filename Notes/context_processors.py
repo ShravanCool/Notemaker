@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from .forms import SearchBarform
 
 def SearchBar(request):

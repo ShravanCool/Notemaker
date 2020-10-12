@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth import forms, get_user_model, models
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
