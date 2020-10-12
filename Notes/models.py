@@ -2,6 +2,8 @@ from ckeditor.fields import RichTextField
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth import get_user_model
+from django.utils.html import mark_safe
+from markdown import markdown
 
 class Term(models.Model):
     """
