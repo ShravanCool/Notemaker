@@ -8,12 +8,12 @@
 {% block content %}
 
 <form class="w-25" enctype="multipart/form-data" action="{% url "Notes:notes" %}" method="post">
-	{% csrf_token %}
-		{{ form.media }}
-	{{ form|crispy }}
-	<input  class="btn btn-primary" type="submit" value="Save">
+  {% csrf_token %}
+    {{ form.media }}
+  {{ form|crispy }}
+  <input class = "btn btn-primary" type="submit" name="" value="Save">
 </form>
 
-<script src="{% static "js/notes.js" %}" type="text/javascript" charset="utf-8"></script>
+<script src="{% static "js/notes.js" %}" charset="utf-8"></script>
 
 {% endblock %}

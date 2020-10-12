@@ -8,9 +8,9 @@
 {% block content %}
 
 <form class="w-25" action="{% url "Notes:term_update" object.term_slug %}" method="post">
-	{% csrf_token %}
-	{{ form|crispy }}
-	<input class="btn btn-primary" type="submit" value="Submit">
+  {% csrf_token %}
+  {{form|crispy}}
+  <input class = "btn btn-primary" type="submit" name="" value="Submit">
 </form>
 
 {% endblock %}
