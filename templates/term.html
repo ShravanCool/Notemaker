@@ -20,9 +20,9 @@
   {% if terms|length == 0 %}
   <tbody>
     <tr>
-      <th scope="row">Example University</th>
+      <th scope="row">VIT University</th>
       <td>1</td>
-      <td>Spring 2019</td>
+      <td>Fall 2019</td>
       <td>View</td>
     </tr>
   </tbody>
@@ -43,6 +43,7 @@
 <form class="w-25" action="{% url "Notes:term" %}" method="post">
   {% csrf_token %}
   {{form|crispy}}
+  <br>
   <input class = "btn btn-primary" type="submit" name="" value="Submit">
 </form>
 

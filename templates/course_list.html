@@ -28,8 +28,8 @@
   {% if courses|length == 0 %}
   <tbody>
     <tr>
-      <th scope="row">G. Chem (Example)</th>
-      <td>Chem 1A</td>
+      <th scope="row">Operating Systems (Example)</th>
+      <td>CSE2005</td>
       <td>Fall 2019</td>
       <td>Folder</td>
     </tr>
@@ -76,6 +76,7 @@
                             method="post">
   {% csrf_token %}
   {{form|crispy}}
+  <br>
   <input class = "btn btn-primary" type="submit" name="" value="Submit">
 </form>
 
