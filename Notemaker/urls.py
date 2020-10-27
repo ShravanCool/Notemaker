@@ -5,6 +5,7 @@ from rest_framework import routers
 from .views import UserCreateView, LoginIndexView, LogOut, UserViewSet
 from Notes.views import (NotesListDashboard, TermViewSet, CourseViewSet,
                          ClassNoteViewSet,)
+from django.conf.urls import url
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
@@ -13,6 +14,7 @@ router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'classnotes', ClassNoteViewSet, basename='classnote')
 
 urlpatterns = [
+    url(r'^markdown/', include('django_markdown.urls')),
     path(
         'admin/',
          admin.site.urls,
