@@ -1,15 +1,15 @@
-from .forms import SearchBarform
+from .forms import SearchBarForm
 
-def SearchBar(request):
+def SearchBarContext(request):
     """
     Produces a context variable for the searchbar that's available across
-    all pages.
+    all pages. 
     """
     return {'searchbar': SearchBarForm()}
 
 def SetCurrentCourses(request):
     """
-    Produces a context variable for all user's current courses that's 
+    Produces a context variable for all a user's current courses that's
     available across all pages.
     """
     user = request.user
