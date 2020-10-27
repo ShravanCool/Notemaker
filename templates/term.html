@@ -43,7 +43,6 @@
 <form class="w-25" action="{% url "Notes:term" %}" method="post">
   {% csrf_token %}
   {{form|crispy}}
-  <br>
   <input class = "btn btn-primary" type="submit" name="" value="Submit">
 </form>
 
