@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serializes and Deserializes User instances into representations such as 
+    Serializes and deserializes User instances into representations such as
     JSON.
     """
     class Meta:

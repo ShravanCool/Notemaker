@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from django.contrib.auth import login, authenticate, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView, LogoutView
@@ -20,12 +17,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """
-        Retrieves current user.
+        Retrieves active user.
         """
         username = self.request.user.username
         user = get_user_model().objects.filter(username=username)
         return user
-
 
 class UserCreateView(CreateView):
     """
@@ -43,20 +39,18 @@ class UserCreateView(CreateView):
         user = user_form.save()
         return HttpResponseRedirect(self.success_url)
 
-
 class LoginIndexView(LoginView):
     """
     Simple view for user login.
     """
     template_name = 'index.html'
-    
+
     def get_success_url(self):
         """
         Directs user to the dashboard upon successful login.
         """
         url = reverse_lazy('dashboard')
         return resolve_url(url)
-
 
 class LogOut(LogoutView):
     """
@@ -69,5 +63,3 @@ class LogOut(LogoutView):
         """
         next_page = reverse_lazy('loginindex')
         return resolve_url(next_page)
-
-
