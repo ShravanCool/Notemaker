@@ -15,7 +15,7 @@ Throughout my undergraduate course, I was exposed to a panomaly of different not
 ## Built with-
 
 - [Bootstrap](https://getbootstrap.com/)- Frontend Framework
-- [django-mdeditor](https://github.com/pylixm/django-mdeditor)- Rich Text-editor with Markdown support and preview
+- [Django-mdeditor](https://github.com/pylixm/django-mdeditor)- Rich Text-editor with Markdown support and preview
 - [Django](https://www.djangoproject.com/)- Backend Framework
 - [Django Crispy Forms](https://django-crispy-forms.readthedocs.io/en/latest/)- Control over form rendering behaviour
 - [Django Rest Framework](https://www.django-rest-framework.org/)- Web-browsable API
@@ -29,7 +29,7 @@ To install the source, pre-requisites include-
 - Python 3.6 or above
 - Dependencies from requirements.txt
 
-First, clone this repository onto your system. Then, create a virtual environment and install the packages from requirements.txt:
+First, clone this repository onto your system. Then, create a virtual environment:
 
 ```
 cd path/to/folder
