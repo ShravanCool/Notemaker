@@ -4,7 +4,7 @@ NoteMaker is a note-taking web application, using which students can efficiently
 
 ## Why?
 
-Throughout my undergraduate course, I was exposed to a panomaly of different note-taking applications, the one I found myself most frequently using was [Google Docs](https://docs.google.com/document/u/0/). Google Docs though powerful in the capabilities of its rich text editor, doesn't offer an ease with which to organise saved notes into an intuitive structure. I wanted to add an extra layer to organisation insofar as to giving the user the ability to organize not just their notes but also courses, academic terms, year, and school. Though people can just as easily attain a high degree of organization via nested directories on their desktop, I wanted something that was more dynamic, and hence I created **Notemaker**.
+Throughout my undergraduate course, I was exposed to a panomaly of different note-taking applications, the one I found myself most frequently using was [Google Docs](https://docs.google.com/document/u/0/). Google Docs though powerful in the capabilities of its rich text editor, doesn't offer an ease with which to organize saved notes into an intuitive structure. I wanted to add an extra layer to organization in so far as to giving the user the ability to organize not just their notes but also courses, academic terms, year, and school. Though people can just as easily attain a high degree of organization via nested directories on their desktop, I wanted something that was more dynamic, and hence I created **Notemaker**.
 
 ## Features-
 
