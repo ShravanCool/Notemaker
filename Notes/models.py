@@ -2,9 +2,7 @@ from ckeditor.fields import RichTextField
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.utils.html import mark_safe
-from markdown import markdown
-from django_markdown.models import MarkdownField
+from mdeditor.fields import MDTextField
 
 class Term(models.Model):
     """
@@ -83,7 +81,7 @@ class ClassNote(models.Model):
         )
     title = models.CharField(max_length=47, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    body = MarkdownField()
+    body = MDTextField()
     note_slug = models.SlugField(null=True)
     course = models.ForeignKey(
         Course,
@@ -105,7 +103,6 @@ class ClassNote(models.Model):
         """
         joined_title = ''.join(self.title.lower().split(' '))
         return joined_title
-
 
     class Meta():
         """
