@@ -13,7 +13,6 @@ router.register(r'courses', CourseViewSet, basename='course')
 router.register(r'classnotes', ClassNoteViewSet, basename='classnote')
 
 urlpatterns = [
-    path('mdeditor/', include('mdeditor.urls')),
     path(
         'admin/',
          admin.site.urls,
@@ -52,4 +51,5 @@ urlpatterns = [
         include('rest_framework.urls'),
         name = 'rest_framework',
         ),
+    path('mdeditor/', include('mdeditor.urls')),
 ]
