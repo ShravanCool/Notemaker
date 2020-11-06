@@ -1,4 +1,4 @@
-from ckeditor.fields import RichTextField
+# from ckeditor.fields import RichTextField
 from django.db import models
 from django.contrib import auth
 from django.contrib.auth import get_user_model
