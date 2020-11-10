@@ -15,7 +15,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', False, cast=bool)
 
 # ALLOWED_HOSTS = ['scribnotesapp.herokuapp.com', 'localhost',]
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
 
 INSTALLED_APPS = [
     'crispy_forms',
@@ -78,6 +78,7 @@ WSGI_APPLICATION = 'Notemaker.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(
         default=config('DATABASE_URL')
+    )
 }
 
 
