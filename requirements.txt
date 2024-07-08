@@ -25,7 +25,7 @@ Pygments==2.7.4
 python-decouple==3.3
 pytz==2020.4
 requests==2.24.0
-sqlparse==0.3.1
+sqlparse==0.4.4
 urllib3==1.26.5
 Werkzeug==2.2.3
 whitenoise==5.2.0
