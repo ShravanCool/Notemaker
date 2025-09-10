@@ -24,7 +24,7 @@ psycopg2==2.8.6
 Pygments==2.7.4
 python-decouple==3.3
 pytz==2020.4
-requests==2.24.0
+requests==2.32.4
 sqlparse==0.4.4
 urllib3==2.5.0
 Werkzeug==3.0.6
